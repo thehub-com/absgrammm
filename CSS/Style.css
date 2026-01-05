@@ -1,0 +1,29 @@
+body {
+  margin: 0;
+  background: #0e1621;
+  color: white;
+  font-family: sans-serif;
+}
+
+.auth {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+button {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  background: #ff9800;
+  color: black;
+  font-weight: bold;
+}
+
+input {
+  width: 90%;
+  margin: 10px;
+  padding: 10px;
+}
