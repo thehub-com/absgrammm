@@ -251,5 +251,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 6000);
 });
 </script>
+<script>
+setTimeout(() => {
+  window.location.href = 'auth.html';
+}, 6000);
+</script>
 </body>
 </html>
