@@ -3,66 +3,61 @@
 document.addEventListener('DOMContentLoaded', async () => {
   console.log('Auth.js загружен');
 
-  // 🔒 Проверяем, что мы именно на auth.html
-  if (!window.location.pathname.includes('auth.html')) {
-    return;
-  }
+  // Проверка активной сессии
+  const { data: { session } } = await supabase.auth.getSession();
 
-  // 1️⃣ Проверка существующей сессии
-  const { data: { session }, error } = await supabase.auth.getSession();
-
-  if (error) {
-    console.error('Ошибка проверки сессии:', error);
-    return;
-  }
-
-  // 2️⃣ Если пользователь уже вошёл — в мессенджер
   if (session) {
-    console.log('Пользователь уже авторизован');
     window.location.href = 'messenger.html';
-    return;
   }
-
-  console.log('Пользователь НЕ авторизован');
 });
 
-// ======================
-// ВХОД ПО EMAIL + PASSWORD
-// ======================
-async function loginWithEmail() {
-  const email = document.getElementById('email')?.value;
-  const password = document.getElementById('password')?.value;
+// DOM
+const emailBox = document.getElementById('authEmail');
+const codeBox  = document.getElementById('authCode');
+const emailInp = document.getElementById('emailInput');
+const codeInp  = document.getElementById('codeInput');
 
-  if (!email || !password) {
-    alert('Введите email и пароль');
-    return;
-  }
+let currentEmail = '';
 
-  const { error } = await supabase.auth.signInWithPassword({
+// ===== ОТПРАВКА КОДА =====
+async function sendCode() {
+  const email = emailInp.value.trim();
+  if (!email) return;
+
+  currentEmail = email;
+
+  const { error } = await supabase.auth.signInWithOtp({
     email,
-    password
-  });
-
-  if (error) {
-    alert(error.message);
-    return;
-  }
-
-  window.location.href = 'messenger.html';
-}
-
-// ======================
-// ВХОД ЧЕРЕЗ GOOGLE
-// ======================
-async function loginWithGoogle() {
-  const { error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
     options: {
-      redirectTo: window.location.origin + '/messenger.html'
+      shouldCreateUser: true
     }
   });
 
   if (error) {
-    alert(error.message);
+    console.error(error.message);
+    return;
   }
+
+  emailBox.style.display = 'none';
+  codeBox.style.display  = 'block';
+}
+
+// ===== ПРОВЕРКА КОДА =====
+async function verifyCode() {
+  const code = codeInp.value.trim();
+  if (!code) return;
+
+  const { data, error } = await supabase.auth.verifyOtp({
+    email: currentEmail,
+    token: code,
+    type: 'email'
+  });
+
+  if (error) {
+    console.error(error.message);
+    return;
+  }
+
+  // редирект в мессенджер
+  window.location.href = 'messenger.html';
 }
